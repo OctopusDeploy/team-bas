@@ -1,0 +1,277 @@
+{
+  "$type": "Octopus.Core.Model.Projects.DeploymentProcess, Octopus.Core",
+  "Id": "deploymentprocess-Projects-1",
+  "OwnerId": "Projects-1",
+  "Version": 53,
+  "Steps": [
+    {
+      "Id": "ce0792d9-df3f-49a8-bdfb-10c854d6abaa",
+      "Name": "SQL - Backup Database",
+      "Condition": "Success",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "f30fad6a-d2c9-4a35-b7bc-54e255e7090a",
+          "Name": "SQL - Backup Database",
+          "ActionType": "Octopus.Script",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.Script.ScriptBody": "$ServerName = $OctopusParameters['Server']\n$DatabaseName = $OctopusParameters['Database']\n$BackupDirectory = $OctopusParameters['BackupDirectory']\n$CompressionOption = [int]$OctopusParameters['Compression']\n$Devices = [int]$OctopusParameters['Devices']\n$Stamp = $OctopusParameters['Stamp']\n$SqlLogin = $OctopusParameters['SqlLogin']\n$SqlPassword = $OctopusParameters['SqlPassword']\n$ConnectionTimeout = $OctopusParameters['ConnectionTimeout']\n$Incremental = [boolean]::Parse($OctopusParameters['Incremental'])\n$CopyOnly = [boolean]::Parse($OctopusParameters['CopyOnly'])\n\n$ErrorActionPreference = \"Stop\"\n\nfunction ConnectToDatabase()\n{\n    param($server, $SqlLogin, $SqlPassword)\n        \n    $server.ConnectionContext.StatementTimeout = $ConnectionTimeout\n     \n    if ($SqlLogin -ne $null) {\n\n        if ($SqlPassword -eq $null) {\n            throw \"SQL Password must be specified when using SQL authentication.\"\n        }\n    \n        $server.ConnectionContext.LoginSecure = $false\n        $server.ConnectionContext.Login = $SqlLogin\n        $server.ConnectionContext.Password = $SqlPassword\n    \n        Write-Host \"Connecting to server using SQL authentication as $SqlLogin.\"\n        $server = New-Object Microsoft.SqlServer.Management.Smo.Server $server.ConnectionContext\n    }\n    else {\n        Write-Host \"Connecting to server using Windows authentication.\"\n    }\n\n    try {\n        $server.ConnectionContext.Connect()\n    } catch {\n        Write-Error \"An error occurred connecting to the database server!`r`n$($_.Exception.ToString())\"\n    }\n}\n\nfunction AddPercentHandler {\n    param($smoBackupRestore, $action)\n\n    $percentEventHandler = [Microsoft.SqlServer.Management.Smo.PercentCompleteEventHandler] { Write-Host $dbName $action $_.Percent \"%\" }\n    $completedEventHandler = [Microsoft.SqlServer.Management.Common.ServerMessageEventHandler] { Write-Host $_.Error.Message}\n        \n    $smoBackupRestore.add_PercentComplete($percentEventHandler)\n    $smoBackupRestore.add_Complete($completedEventHandler)\n    $smoBackupRestore.PercentCompleteNotification=10\n}\n\nfunction CreatDevice {\n    param($smoBackupRestore, $directory, $name)\n\n    $devicePath = Join-Path $directory ($name)\n    $smoBackupRestore.Devices.AddDevice($devicePath, \"File\")    \n    return $devicePath\n}\n\nfunction CreateDevices {\n    param($smoBackupRestore, $devices, $directory, $dbName, $incremental)\n        \n    $targetPaths = New-Object System.Collections.Generic.List[System.String]\n\t\n\t$extension = \".bak\"\n\t\n\tif ($Incremental -eq $true){\n\t\t$extension = \".trn\"\n\t}\n    \n    if ($devices -eq 1){\n        $deviceName = $dbName + \"_\" + $timestamp + $extension\n        $targetPath = CreatDevice $smoBackupRestore $directory $deviceName\n        $targetPaths.Add($targetPath)\n    } else {\n        for ($i=1; $i -le $devices; $i++){\n            $deviceName = $dbName + \"_\" + $timestamp + \"_\" + $i + $extension\n            $targetPath = CreatDevice $smoBackupRestore $directory $deviceName\n            $targetPaths.Add($targetPath)\n        }\n    }\n    return $targetPaths\n}\n\nfunction BackupDatabase {\n    param($dbName, $devices, $compressionOption, $incremental, $copyonly)  \n    \n    $smoBackup = New-Object Microsoft.SqlServer.Management.Smo.Backup\n    $targetPaths = CreateDevices $smoBackup $devices $BackupDirectory $dbName $incremental\n\n    Write-Host \"Attempting to backup database $ServerName.$dbName to:\"\n    $targetPaths\n    Write-Host \"\"\n\n\tif ($incremental -eq $true){\n\t\t$smoBackup.Action = \"Log\";            \n\t\t$smoBackup.BackupSetDescription = \"Log backup of \" + $dbName                  \n\t\t$smoBackup.LogTruncation = \"Truncate\"\n\t} else {\n\t\t$smoBackup.Action = \"Database\"\n\t\t$smoBackup.BackupSetDescription = \"Full Backup of \" + $dbName\n\t}\n\t\n\t$smoBackup.BackupSetName = $dbName + \" Backup\"\t\n\t$smoBackup.MediaDescription = \"Disk\"\n\t$smoBackup.CompressionOption = $compressionOption\n\t$smoBackup.CopyOnly = $copyonly\n\t$smoBackup.Initialize = $true\n\t$smoBackup.Database = $dbName;\n    \n    try {\n        AddPercentHandler $smoBackup \"backed up\"\n        $smoBackup.SqlBackup($server)\n    } catch {\n        Write-Error \"An error occurred backing up the database!`r`n$($_.Exception.ToString())\"\n    }\n \n    Write-Host \"Backup completed successfully.\"\n}\n\n[System.Reflection.Assembly]::LoadWithPartialName(\"Microsoft.SqlServer.SMO\") | Out-Null\n[System.Reflection.Assembly]::LoadWithPartialName(\"Microsoft.SqlServer.SmoExtended\") | Out-Null\n[System.Reflection.Assembly]::LoadWithPartialName(\"Microsoft.SqlServer.ConnectionInfo\") | Out-Null\n[System.Reflection.Assembly]::LoadWithPartialName(\"Microsoft.SqlServer.SmoEnum\") | Out-Null\n \n$server = New-Object Microsoft.SqlServer.Management.Smo.Server $ServerName\n\nConnectToDatabase $server $SqlLogin $SqlPassword\n\n$database = $server.Databases | Where-Object { $_.Name -eq $DatabaseName }\n$timestamp = if(-not [string]::IsNullOrEmpty($Stamp)) { $Stamp } else { Get-Date -format yyyy-MM-dd-HHmmss }\n\nif (-not (Test-Path $BackupDirectory)) {\n    Write-Host \"Creating output directory `\"$BackupDirectory`\".\"\n    New-Item $BackupDirectory -ItemType Directory | Out-Null\n}\n\nif ($database -eq $null) {\n    Write-Error \"Database $DatabaseName does not exist on $ServerName\"\n}\n\nif ($Incremental -eq $true) {\n\n\tif ($database.RecoveryModel -eq 3) {\n\t\twrite-error \"$DatabaseName has Recovery Model set to Simple. Log backup cannot be run.\"\n\t}\n\t\n\tif ($database.LastBackupDate -eq \"1/1/0001 12:00 AM\") {\n\t\twrite-error \"$DatabaseName has no Full backups. Log backup cannot be run.\"\n\t}\n}\n\nBackupDatabase $DatabaseName $Devices $CompressionOption $Incremental $CopyOnly",
+            "Octopus.Action.Script.Syntax": "PowerShell",
+            "Octopus.Action.Template.Id": "ActionTemplates-21",
+            "Octopus.Action.Template.Version": "7",
+            "Server": "#{DatabaseServer}",
+            "Compression": "0",
+            "Devices": "1",
+            "ConnectionTimeout": "36000",
+            "Incremental": "false",
+            "CopyOnly": "true",
+            "Octopus.Action.RunOnServer": "true",
+            "Database": "#{DatabaseName}",
+            "BackupDirectory": "C:\\Backups\\#{DatabaseName}"
+          }
+        }
+      ],
+      "Properties": {}
+    },
+    {
+      "Id": "7bc40025-d7d6-476b-83a3-da079f5af2a9",
+      "Name": "Approve (Production Only)",
+      "Condition": "Always",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "df5fb0a4-a112-4ef8-aa64-976712d2205f",
+          "Name": "Approve (Production Only)",
+          "ActionType": "Octopus.Manual",
+          "IsDisabled": false,
+          "Environments": [
+            "Environments-2"
+          ],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.Manual.Instructions": "Are you sure you want this deployment to proceed?",
+            "Octopus.Action.Manual.ResponsibleTeamIds": "Teams-182,teams-everyone"
+          }
+        }
+      ],
+      "Properties": {}
+    },
+    {
+      "Id": "79dc7989-656a-41ed-bc02-fd0c6172aead",
+      "Name": "Database schema - DbUp",
+      "Condition": "Always",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "09889247-e259-481c-9c4f-9315c32ddb21",
+          "Name": "Database schema - DbUp",
+          "ActionType": "Octopus.TentaclePackage",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles": "True",
+            "Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": "True",
+            "Octopus.Action.EnabledFeatures": "Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
+            "Octopus.Action.Package.DownloadOnTentacle": "False",
+            "Octopus.Action.Package.FeedId": "feeds-builtin",
+            "Octopus.Action.Package.PackageId": "OctoFX.Database"
+          }
+        }
+      ],
+      "Properties": {
+        "Octopus.Action.TargetRoles": "octofx-app"
+      }
+    },
+    {
+      "Id": "45059d7b-afd7-42b0-aa71-ceebda6ebe50",
+      "Name": "Rate Service - Windows Service",
+      "Condition": "Success",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "58132835-d28a-4541-81da-57024212b061",
+          "Name": "Rate Service - Windows Service",
+          "ActionType": "Octopus.WindowsService",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.WindowsService.CreateOrUpdateService": "True",
+            "Octopus.Action.WindowsService.ServiceAccount": "NT Authority\\Network Service",
+            "Octopus.Action.WindowsService.StartMode": "auto",
+            "Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles": "True",
+            "Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": "True",
+            "Octopus.Action.EnabledFeatures": "Octopus.Features.WindowsService,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
+            "Octopus.Action.Package.FeedId": "feeds-builtin",
+            "Octopus.Action.Package.DownloadOnTentacle": "False",
+            "Octopus.Action.Package.PackageId": "OctoFX.RateService",
+            "Octopus.Action.WindowsService.ServiceName": "OctoFXRateService#{Octopus.Environment.Name}",
+            "Octopus.Action.WindowsService.DisplayName": "OctoFX Rate Service #{Octopus.Environment.Name}",
+            "Octopus.Action.WindowsService.Description": "Rate feed service - generates new rates",
+            "Octopus.Action.WindowsService.ExecutablePath": "OctoFX.RateService.exe"
+          }
+        }
+      ],
+      "Properties": {
+        "Octopus.Action.TargetRoles": "octofx-app"
+      }
+    },
+    {
+      "Id": "99bc491c-d7c7-497e-bdbd-111c52ee139c",
+      "Name": "Zero-downtime rolling website deployment",
+      "Condition": "Success",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "46bdd948-d350-4486-9e57-0e004a1d9c4e",
+          "Name": "Remove from load balancer",
+          "ActionType": "Octopus.Script",
+          "IsDisabled": false,
+          "Environments": [
+            "Environments-2"
+          ],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.RunOnServer": "false",
+            "Octopus.Action.Script.ScriptSource": "Inline",
+            "Octopus.Action.Script.Syntax": "PowerShell",
+            "Octopus.Action.Script.ScriptBody": "Write-Host \"Removing from load balancer... (this is specific to your target environment)\""
+          }
+        },
+        {
+          "Id": "23216687-6d53-4bfb-8cf9-371260c07a5d",
+          "Name": "Trading Website - ASP.NET MVC",
+          "ActionType": "Octopus.IIS",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.IISWebSite.DeploymentType": "webSite",
+            "Octopus.Action.IISWebSite.CreateOrUpdateWebSite": "True",
+            "Octopus.Action.IISWebSite.Bindings": "[{\"protocol\":\"http\",\"port\":80,\"host\":\"#{WebsiteHostName}\",\"thumbprint\":null,\"certificateVariable\":null,\"requireSni\":false,\"enabled\":true},{\"protocol\":\"https\",\"ipAddress\":\"*\",\"port\":\"443\",\"host\":\"#{WebsiteHostName}\",\"thumbprint\":null,\"certificateVariable\":\"WebsiteCertificate\",\"requireSni\":true,\"enabled\":true}]",
+            "Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion": "v4.0",
+            "Octopus.Action.IISWebSite.ApplicationPoolIdentityType": "NetworkService",
+            "Octopus.Action.IISWebSite.EnableAnonymousAuthentication": "True",
+            "Octopus.Action.IISWebSite.EnableBasicAuthentication": "False",
+            "Octopus.Action.IISWebSite.EnableWindowsAuthentication": "False",
+            "Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion": "v4.0",
+            "Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType": "ApplicationPoolIdentity",
+            "Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles": "True",
+            "Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": "True",
+            "Octopus.Action.EnabledFeatures": "Octopus.Features.IISWebSite,Octopus.Features.CustomDirectory,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms",
+            "Octopus.Action.Package.FeedId": "feeds-builtin",
+            "Octopus.Action.Package.DownloadOnTentacle": "False",
+            "Octopus.Action.IISWebSite.StartApplicationPool": "True",
+            "Octopus.Action.Package.PackageId": "OctoFX.TradingWebsite",
+            "Octopus.Action.Package.CustomInstallationDirectory": "C:\\Websites\\#{Octopus.Environment.Name}\\TradingWebsite",
+            "Octopus.Action.IISWebSite.WebSiteName": "OctoFX - #{Octopus.Environment.Name}",
+            "Octopus.Action.IISWebSite.ApplicationPoolName": "OctoFX App Pool - #{Octopus.Environment.Name}",
+            "Octopus.Action.IISWebSite.WebRootType": "packageRoot",
+            "Octopus.Action.IISWebSite.StartWebSite": "True"
+          }
+        },
+        {
+          "Id": "4b5ef90d-2767-48a7-a54e-7fcf8026f44f",
+          "Name": "HTTP - Test URL",
+          "ActionType": "Octopus.Script",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.Script.ScriptBody": "$uri = $OctopusParameters['Uri']\n$customHostHeader = $OctopusParameters['CustomHostHeader']\n$expectedCode = [int] $OctopusParameters['ExpectedCode']\n$timeoutSeconds = [int] $OctopusParameters['TimeoutSeconds']\n$Username = $OctopusParameters['AuthUsername']\n$Password = $OctopusParameters['AuthPassword']\n$UseWindowsAuth = [System.Convert]::ToBoolean($OctopusParameters['UseWindowsAuth'])\n$ExpectedResponse = $OctopusParameters['ExpectedResponse']\n\n\nWrite-Host \"Starting verification request to $uri\"\nif ($customHostHeader)\n{\n    Write-Host \"Using custom host header $customHostHeader\"\n}\n\nWrite-Host \"Expecting response code $expectedCode.\"\nWrite-Host \"Expecting response: $ExpectedResponse.\"\n\n\n$timer = [System.Diagnostics.Stopwatch]::StartNew()\n$success = $false\ndo\n{\n    try\n    {\n        if ($Username -and $Password -and $UseWindowsAuth)\n        {\n            Write-Host \"Making request to $uri using windows authentication for user $Username\"\n            $request = [system.Net.WebRequest]::Create($uri)\n            $Credential = New-Object System.Management.Automation.PSCredential -ArgumentList $Username, $(ConvertTo-SecureString -String $Password -AsPlainText -Force)\n            $request.Credentials = $Credential \n            \n            if ($customHostHeader)\n            {\n                $request.Host = $customHostHeader\n            }\n\n            try\n            {\n                $response = $request.GetResponse()\n            }\n            catch [System.Net.WebException]\n            {\n                Write-Host \"Request failed :-( System.Net.WebException\"\n                Write-Host $_.Exception\n                $response = $_.Exception.Response\n            }\n            \n        }\n\t\telseif ($Username -and $Password)\n        {\n            Write-Host \"Making request to $uri using basic authentication for user $Username\"\n            $Credential = New-Object System.Management.Automation.PSCredential -ArgumentList $Username, $(ConvertTo-SecureString -String $Password -AsPlainText -Force)\n            if ($customHostHeader)\n            {\n                $response = Invoke-WebRequest -Uri $uri -Method Get -UseBasicParsing -Credential $Credential -Headers @{\"Host\" = $customHostHeader}\n            }\n            else \n            {\n                $response = Invoke-WebRequest -Uri $uri -Method Get -UseBasicParsing -Credential $Credential\n            }\n        }\n\t\telse\n        {\n            Write-Host \"Making request to $uri using anonymous authentication\"\n            if ($customHostHeader)\n            {\n                $response = Invoke-WebRequest -Uri $uri -Method Get -UseBasicParsing -Headers @{\"Host\" = $customHostHeader}\n            }\n            else \n            {\n                $response = Invoke-WebRequest -Uri $uri -Method Get -UseBasicParsing\n            }\n        }\n        \n        $code = $response.StatusCode\n        $body = $response.Content;\n        Write-Host \"Recieved response code: $code\"\n        Write-Host \"Recieved response: $body\"\n\n        if($response.StatusCode -eq $expectedCode)\n        {\n            $success = $true\n        }\n        if ($success -and $ExpectedResponse)\n        {\n            $success = ($ExpectedResponse -eq $body)\n        }\n    }\n    catch\n    {\n        # Anything other than a 200 will throw an exception so\n        # we check the exception message which may contain the \n        # actual status code to verify\n        \n        Write-Host \"Request failed :-(\"\n        Write-Host $_.Exception\n\n        if($_.Exception -like \"*($expectedCode)*\")\n        {\n            $success = $true\n        }\n    }\n\n    if(!$success)\n    {\n        Write-Host \"Trying again in 5 seconds...\"\n        Start-Sleep -s 5\n    }\n}\nwhile(!$success -and $timer.Elapsed -le (New-TimeSpan -Seconds $timeoutSeconds))\n\n$timer.Stop()\n\n# Verify result\n\nif(!$success)\n{\n    throw \"Verification failed - giving up.\"\n}\n\nWrite-Host \"Sucesss! Found status code $expectedCode\"",
+            "Octopus.Action.Script.Syntax": "PowerShell",
+            "Octopus.Action.Script.ScriptSource": "Inline",
+            "Octopus.Action.RunOnServer": "false",
+            "Octopus.Action.Template.Id": "ActionTemplates-2",
+            "Octopus.Action.Template.Version": "13",
+            "ExpectedCode": "200",
+            "TimeoutSeconds": "120",
+            "UseWindowsAuth": "False",
+            "Uri": "http://localhost",
+            "CustomHostHeader": "#{WebsiteHostName}"
+          }
+        },
+        {
+          "Id": "d3bedab3-7f9f-4ac0-bdd4-df5b13f1f570",
+          "Name": "Return to load balancer",
+          "ActionType": "Octopus.Script",
+          "IsDisabled": false,
+          "Environments": [
+            "Environments-2"
+          ],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.RunOnServer": "false",
+            "Octopus.Action.Script.ScriptSource": "Inline",
+            "Octopus.Action.Script.Syntax": "PowerShell",
+            "Octopus.Action.Script.ScriptBody": "Write-Host \"Adding back to load balancer... (this is specific to your target environment)\""
+          }
+        }
+      ],
+      "Properties": {
+        "Octopus.Action.TargetRoles": "octofx-web",
+        "Octopus.Action.MaxParallelism": "1"
+      }
+    },
+    {
+      "Id": "0f98bf0f-3f1a-40c3-948a-e638223c37b0",
+      "Name": "Celebrate the deployment!",
+      "Condition": "Success",
+      "StartTrigger": "StartAfterPrevious",
+      "PackageRequirement": "LetOctopusDecide",
+      "Actions": [
+        {
+          "Id": "b970f65a-ce7b-4d11-b9e1-b054dc82e443",
+          "Name": "Celebrate the deployment!",
+          "ActionType": "Octopus.Script",
+          "IsDisabled": false,
+          "Environments": [],
+          "ExcludedEnvironments": [],
+          "Channels": [],
+          "TenantTags": [],
+          "Properties": {
+            "Octopus.Action.Script.Syntax": "PowerShell",
+            "Octopus.Action.Script.ScriptSource": "Inline",
+            "Octopus.Action.RunOnServer": "true",
+            "Octopus.Action.Script.ScriptBody": "Write-output \"Your message: $message\"",
+            "Octopus.Action.Template.Version": "3",
+            "Octopus.Action.Template.Id": "ActionTemplates-3",
+            "Message": "Woohoo, the deployment completed!"
+          }
+        }
+      ],
+      "Properties": {}
+    }
+  ],
+  "RelatedDocumentIds": [
+    "Environments-2",
+    "ActionTemplates-21",
+    "ActionTemplates-2",
+    "ActionTemplates-3"
+  ]
+}

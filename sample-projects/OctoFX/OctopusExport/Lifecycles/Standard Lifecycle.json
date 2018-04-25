@@ -1,0 +1,17 @@
+{
+  "$type": "Octopus.Core.Model.Lifecycles.Lifecycle, Octopus.Core",
+  "Id": "Lifecycles-21",
+  "Name": "Standard Lifecycle",
+  "Description": null,
+  "Phases": [],
+  "ReleaseRetentionPolicy": {
+    "Unit": "Items",
+    "QuantityToKeep": 4,
+    "ShouldKeepForever": false
+  },
+  "TentacleRetentionPolicy": {
+    "Unit": "Items",
+    "QuantityToKeep": 10,
+    "ShouldKeepForever": false
+  }
+}

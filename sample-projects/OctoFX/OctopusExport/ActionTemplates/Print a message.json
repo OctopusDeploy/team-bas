@@ -1,0 +1,27 @@
+{
+  "$type": "Octopus.Core.Model.Projects.ActionTemplate, Octopus.Core",
+  "Id": "ActionTemplates-3",
+  "Name": "Print a message",
+  "Description": null,
+  "Version": 3,
+  "ActionType": "Octopus.Script",
+  "CommunityActionTemplateId": null,
+  "Properties": {
+    "Octopus.Action.Script.Syntax": "PowerShell",
+    "Octopus.Action.Script.ScriptSource": "Inline",
+    "Octopus.Action.RunOnServer": "false",
+    "Octopus.Action.Script.ScriptBody": "Write-output \"Your message: $message\""
+  },
+  "Parameters": [
+    {
+      "Id": "017bb187-3f91-48ee-bcaa-e8db41b9a236",
+      "Name": "Message",
+      "Label": "Message",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      }
+    }
+  ]
+}
