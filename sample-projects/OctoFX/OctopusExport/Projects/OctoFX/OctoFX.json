@@ -1,0 +1,40 @@
+{
+  "$type": "Octopus.Core.Model.Projects.Project, Octopus.Core",
+  "Id": "Projects-1",
+  "Name": "OctoFX",
+  "Description": "This is a sample application with a SQL Server database, an ASP.NET MVC frontend, and a Windows Service that runs in the background. The app is deployed live; you can find it at:\n\n - Dev: [dev.octofx.com](http://dev.octofx.com)\n - Test: [test.octofx.com](http://dev.octofx.com)\n - Production: [octofx.com](http://dev.octofx.com)\n\nSource code for the app is on GitHub:\n\n<i class='fa fa-fw fa-github'></i> [OctopusSamples/OctoFX](https://github.com/OctopusSamples/OctoFX)\n\nThe project uses TeamCity as the build server - you can log in to TeamCity as a guest:\n\n<i class=\"fa fa-fw fa-building text-primary\" aria-hidden=\"true\"></i> [TeamCity Build Server](http://teamcity.octopusdeploy.com)",
+  "Slug": "octofx",
+  "IsDisabled": false,
+  "VariableSetId": "variableset-Projects-1",
+  "DeploymentProcessId": "deploymentprocess-Projects-1",
+  "ProjectGroupId": "ProjectGroups-1",
+  "LifecycleId": "Lifecycles-21",
+  "AutoCreateRelease": false,
+  "DiscreteChannelRelease": false,
+  "IncludedLibraryVariableSetIds": [],
+  "UsedPackages": [
+    "OctoFX.RateService",
+    "OctoFX.Database",
+    "OctoFX.TradingWebsite"
+  ],
+  "DefaultToSkipIfAlreadyInstalled": false,
+  "TenantedDeploymentMode": "Untenanted",
+  "VersioningStrategy": {
+    "DonorPackageStepId": "09889247-e259-481c-9c4f-9315c32ddb21",
+    "Template": null
+  },
+  "DefaultGuidedFailureMode": "EnvironmentDefault",
+  "Templates": [],
+  "ReleaseCreationStrategy": {
+    "ReleaseCreationPackageStepId": "",
+    "ChannelId": null
+  },
+  "ProjectConnectivityPolicy": {
+    "SkipMachineBehavior": "None",
+    "TargetRoles": [],
+    "AllowDeploymentsToNoTargets": false
+  },
+  "AutoDeployReleaseOverrides": [],
+  "LogoAttachmentKey": "Projects-1",
+  "LogoAttachmentMimeType": "image/png"
+}

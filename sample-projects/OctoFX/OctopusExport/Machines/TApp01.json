@@ -1,0 +1,23 @@
+{
+  "$type": "Octopus.Core.Model.Environments.Machine, Octopus.Core",
+  "Id": "Machines-3",
+  "Name": "TApp01",
+  "Endpoint": {
+    "$type": "Octopus.Core.Model.Environments.Endpoints.ListeningTentacleEndpoint, Octopus.Core",
+    "ProxyId": null,
+    "Thumbprint": "402853467CA0B960E119BC147EA051601E5F1C4D",
+    "Uri": "https://localhost:10933",
+    "UpgradeLocked": false
+  },
+  "IsDisabled": false,
+  "Roles": [
+    "octofx-app"
+  ],
+  "EnvironmentIds": [
+    "Environments-3"
+  ],
+  "TenantedDeploymentParticipation": "Untenanted",
+  "TenantIds": [],
+  "TenantTags": [],
+  "MachinePolicyId": "MachinePolicies-1"
+}

@@ -1,0 +1,8 @@
+{
+  "$type": "Octopus.Core.Model.Environments.DeploymentEnvironment, Octopus.Core",
+  "Id": "Environments-3",
+  "Name": "Test",
+  "Description": "A test environment containing one server, which is both a web and application server.",
+  "SortOrder": 1,
+  "UseGuidedFailure": false
+}

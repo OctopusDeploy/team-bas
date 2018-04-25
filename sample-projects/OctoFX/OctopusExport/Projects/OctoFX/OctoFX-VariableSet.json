@@ -1,0 +1,191 @@
+{
+  "$type": "Octopus.Core.Model.Variables.VariableSet, Octopus.Core",
+  "Id": "variableset-Projects-1",
+  "OwnerId": "Projects-1",
+  "Version": 13,
+  "Variables": [
+    {
+      "Id": "b79bf6dc-d85b-b7e6-6e4c-c6d544cf065c",
+      "Name": "DatabaseName",
+      "Description": null,
+      "Type": "String",
+      "Value": "OctoFX_Production",
+      "Scope": {
+        "Environment": [
+          "Environments-2"
+        ]
+      }
+    },
+    {
+      "Id": "5210e3ba-466c-cdef-04b8-7d0bd71926ee",
+      "Name": "DatabaseName",
+      "Description": null,
+      "Type": "String",
+      "Value": "OctoFX_Development",
+      "Scope": {
+        "Environment": [
+          "Environments-1"
+        ]
+      }
+    },
+    {
+      "Id": "05a4c0a1-e61e-c335-3e31-956f618cb28a",
+      "Name": "DatabaseName",
+      "Description": null,
+      "Type": "String",
+      "Value": "OctoFX_Test",
+      "Scope": {
+        "Environment": [
+          "Environments-3"
+        ]
+      }
+    },
+    {
+      "Id": "1b1c11c6-b173-a6e8-3e00-d9a292b80d80",
+      "Name": "DatabaseServer",
+      "Description": null,
+      "Type": "String",
+      "Value": "(local)\\SQLExpress",
+      "Scope": {
+        "Environment": []
+      }
+    },
+    {
+      "Id": "0628a10b-a32b-e407-69ff-02e54d1a89ba",
+      "Name": "DatabaseUser",
+      "Description": null,
+      "Type": "String",
+      "Value": "svcOctoFX_DevTest",
+      "Scope": {
+        "Environment": [
+          "Environments-1",
+          "Environments-3"
+        ]
+      }
+    },
+    {
+      "Id": "41ba464a-2338-39ef-b0a8-3bdaa417a184",
+      "Name": "DatabaseUser",
+      "Description": null,
+      "Type": "String",
+      "Value": "svcOctoFX_Prod",
+      "Scope": {
+        "Environment": [
+          "Environments-2"
+        ]
+      }
+    },
+    {
+      "Id": "2f0e22a0-6b98-674d-3637-043d659ca0f0",
+      "Name": "DatabaseUserPassword",
+      "Description": null,
+      "Type": "Sensitive",
+      "Value": "1HCZ7XM7TySmnmXKvF6blw==|AAAAAAAAAAAAAAAAAAAAAA==",
+      "Scope": {
+        "Environment": [
+          "Environments-1",
+          "Environments-3"
+        ]
+      }
+    },
+    {
+      "Id": "161104d5-d95a-66d1-9c0a-ddfb2feba8a2",
+      "Name": "DatabaseUserPassword",
+      "Description": null,
+      "Type": "Sensitive",
+      "Value": "1HCZ7XM7TySmnmXKvF6blw==|AAAAAAAAAAAAAAAAAAAAAA==",
+      "Scope": {
+        "Environment": [
+          "Environments-2"
+        ]
+      }
+    },
+    {
+      "Id": "31c40863-74ef-aa5c-7b82-44dade176204",
+      "Name": "OctoFXDatabase",
+      "Description": null,
+      "Type": "String",
+      "Value": "Server=#{DatabaseServer};Database=#{DatabaseName};Trusted_connection=true;"
+    },
+    {
+      "Id": "7c530ba0-03d8-f76b-64f1-036e26d5ef40",
+      "Name": "WebsiteCertificate",
+      "Description": null,
+      "Type": "Certificate",
+      "Value": "certificates-www-octofx-com",
+      "Scope": {
+        "Environment": [
+          "Environments-2"
+        ]
+      }
+    },
+    {
+      "Id": "e83e7dc7-b9fe-5962-8c8c-30fab675e41c",
+      "Name": "WebsiteCertificate",
+      "Description": null,
+      "Type": "Certificate",
+      "Value": "certificates-test-octofx-com",
+      "Scope": {
+        "Environment": [
+          "Environments-3"
+        ]
+      }
+    },
+    {
+      "Id": "8e2537ce-69f4-9fca-9f02-f84066437482",
+      "Name": "WebsiteCertificate",
+      "Description": null,
+      "Type": "Certificate",
+      "Value": "certificates-dev-octofx-com",
+      "Scope": {
+        "Environment": [
+          "Environments-1"
+        ]
+      }
+    },
+    {
+      "Id": "db0fb911-a11e-42a9-a228-cae172a96e95",
+      "Name": "WebsiteHostName",
+      "Description": null,
+      "Type": "String",
+      "Value": "dev.octofx.com",
+      "Scope": {
+        "Environment": [
+          "Environments-1"
+        ]
+      }
+    },
+    {
+      "Id": "84173502-7d00-6eeb-7ee7-7106f873b5ba",
+      "Name": "WebsiteHostName",
+      "Description": null,
+      "Type": "String",
+      "Value": "test.octofx.com",
+      "Scope": {
+        "Environment": [
+          "Environments-3"
+        ]
+      }
+    },
+    {
+      "Id": "a04e4d4a-7252-ea49-63ab-0eae5ae0fdd6",
+      "Name": "WebsiteHostName",
+      "Description": null,
+      "Type": "String",
+      "Value": "octofx.com",
+      "Scope": {
+        "Environment": [
+          "Environments-2"
+        ]
+      }
+    }
+  ],
+  "RelatedDocumentIds": [
+    "Environments-2",
+    "Environments-1",
+    "Environments-3",
+    "certificates-www-octofx-com",
+    "certificates-test-octofx-com",
+    "certificates-dev-octofx-com"
+  ]
+}

@@ -1,0 +1,1 @@
+Write-output "Your message: $message"

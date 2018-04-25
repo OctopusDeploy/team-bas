@@ -1,0 +1,8 @@
+{
+  "$type": "Octopus.Core.Model.Environments.DeploymentEnvironment, Octopus.Core",
+  "Id": "Environments-2",
+  "Name": "Production",
+  "Description": "Production environment, containing one application server, and two load-balanced web servers.",
+  "SortOrder": 2,
+  "UseGuidedFailure": true
+}
