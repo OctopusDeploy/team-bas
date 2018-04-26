@@ -16,6 +16,7 @@
           "Name": "SQL - Backup Database",
           "ActionType": "Octopus.Script",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],
@@ -51,6 +52,7 @@
           "Name": "Approve (Production Only)",
           "ActionType": "Octopus.Manual",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [
             "Environments-2"
           ],
@@ -77,6 +79,7 @@
           "Name": "Database schema - DbUp",
           "ActionType": "Octopus.TentaclePackage",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],
@@ -107,6 +110,7 @@
           "Name": "Rate Service - Windows Service",
           "ActionType": "Octopus.WindowsService",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],
@@ -144,6 +148,7 @@
           "Name": "Remove from load balancer",
           "ActionType": "Octopus.Script",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [
             "Environments-2"
           ],
@@ -162,6 +167,7 @@
           "Name": "Trading Website - ASP.NET MVC",
           "ActionType": "Octopus.IIS",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],
@@ -196,6 +202,7 @@
           "Name": "HTTP - Test URL",
           "ActionType": "Octopus.Script",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],
@@ -219,6 +226,7 @@
           "Name": "Return to load balancer",
           "ActionType": "Octopus.Script",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [
             "Environments-2"
           ],
@@ -250,6 +258,7 @@
           "Name": "Celebrate the deployment!",
           "ActionType": "Octopus.Script",
           "IsDisabled": false,
+          "IsRequired": false,
           "Environments": [],
           "ExcludedEnvironments": [],
           "Channels": [],

@@ -2,7 +2,7 @@
   "$type": "Octopus.Migrator.ExportProcess.ServerMetadata, Octopus.Migrator",
   "Id": "PAULSURFACE",
   "Name": "PAULSURFACE",
-  "Created": "2018-04-25T14:03:43.8755347+10:00",
-  "DatabaseVersion": "2018.3.2",
+  "Created": "2018-04-26T10:36:21.839218+10:00",
+  "DatabaseVersion": "2018.4.4",
   "Hello": "n/obuqor3CiQ1pn+sfrksA==|AAAAAAAAAAAAAAAAAAAAAA=="
 }
