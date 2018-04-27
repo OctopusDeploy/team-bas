@@ -1,15 +1,5 @@
 {
-  "$type": "Octopus.Core.Model.Environments.Machine, Octopus.Core",
-  "Id": "Machines-2",
-  "Name": "TWeb01",
-  "Endpoint": {
-    "$type": "Octopus.Core.Model.Environments.Endpoints.ListeningTentacleEndpoint, Octopus.Core",
-    "ProxyId": null,
-    "Thumbprint": "402853467CA0B960E119BC147EA051601E5F1C4D",
-    "Uri": "https://localhost:10933",
-    "UpgradeLocked": false
-  },
-  "IsDisabled": false,
+  "$type": "Octopus.Core.Model.Machines.DeploymentTargets.DeploymentTarget, Octopus.Core",
   "Roles": [
     "octofx-web"
   ],
@@ -19,5 +9,16 @@
   "TenantedDeploymentParticipation": "Untenanted",
   "TenantIds": [],
   "TenantTags": [],
+  "Type": "DeploymentTarget",
+  "Id": "Machines-2",
+  "Name": "TWeb01",
+  "Endpoint": {
+    "$type": "Octopus.Core.Model.Machines.Endpoints.ListeningTentacleEndpoint, Octopus.Core",
+    "ProxyId": null,
+    "Thumbprint": "402853467CA0B960E119BC147EA051601E5F1C4D",
+    "Uri": "https://localhost:10933",
+    "UpgradeLocked": false
+  },
+  "IsDisabled": false,
   "MachinePolicyId": "MachinePolicies-1"
 }
