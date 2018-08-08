@@ -126,38 +126,47 @@ Resources:
                 
                 & .\tentacle.exe create-instance --instance "Tentacle" --config $tentacleConfigFile --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                 curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on create-instance for $registerComputerName.\"}" https://hooks.slack.com/services/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
                  throw "Installation failed on create-instance" 
                 } 
                 & .\tentacle.exe configure --instance "Tentacle" --home $tentacleHomeDirectory --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on configure home directory for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on configure" 
                 } 
                 & .\tentacle.exe configure --instance "Tentacle" --app $tentacleAppDirectory --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on configure app directory for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on configure" 
                 } 
                 & .\tentacle.exe configure --instance "Tentacle" --port $tentacleListenPort --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on configure listen port for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on configure" 
                 } 
                 & .\tentacle.exe new-certificate --instance "Tentacle" --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on creating new certificate for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on creating new certificate" 
                 } 
                 & .\tentacle.exe configure --instance "Tentacle" --trust $octopusServerThumbprint --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on configuring octopus server thumbprint for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on configure" 
                 } 	                  
                 $cmd = "& .\tentacle.exe register-with --instance `"Tentacle`" --server $octopusServerUrl $rolesToRegister --role $bootstrapRoleName --role $applicationName --environment `"SpinUp`" --environment `"TearDown`" $environmentsToRegister --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console"
                 Invoke-Expression $cmd | Write-Host
                 if ($lastExitCode -ne 0) { 
+                  curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on registering $registerComputerName with $octopusServerUrl.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on register-with" 
                 } 				                		               
                 & .\tentacle.exe service --instance "Tentacle" --install --start --console | Write-Output
                 if ($lastExitCode -ne 0) { 
+                   curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":sadpanda: <!channel> Installation failed on install for $registerComputerName.\"}" https://hooks.slack.com/services/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
                   throw "Installation failed on service install" 
                 } 
-
+                
+                curl -X POST --data-urlencode "payload={\"channel\": \"#demo-env-pulse\", \"username\": \"Cloud Formation PowerShell Bootstrap\", \"text\": \":woohoo: Installation of bootstrap tentacle on $registerComputerName was successful.\"}" https://hooks.slack.com/services/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
                 Write-Output "Tentacle commands complete"             
               
               </powershell>
