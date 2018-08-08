@@ -56,13 +56,13 @@ foreach ($tenant in $tenantList){
       & .\tentacle.exe register-with --instance "Tentacle" --server $octopusServerUrl --role $applicationName --role $applicationRoleName --environment $environment --tenant $tenant --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console | Write-Host	
       if ($lastExitCode -ne 0) { 
 		$slackBody["text"] = ":sadpanda: \<!channel\> Failed to register $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName for the tenant $tenant"
-		Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+		Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
         throw "Installation failed on register-with" 
       } 	
       else{
           Write-Host "Successfully registered the machine $registerComputerName"
 		  $slackBody["text"] = ":highfive: Successfully registered the machine $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName for the tenant $tenant"
-		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
       }    	 	 
   }
 }
@@ -91,12 +91,12 @@ foreach ($tenant in $tenantList){
       & .\tentacle.exe register-with --instance "Tentacle" --server $octopusServerUrl --role $applicationName --role $applicationRoleName --environment $environment --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console | Write-Host	
 	  if ($lastExitCode -ne 0) { 
 		$slackBody["text"] = ":sadpanda: \<!channel\> Failed to register $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName"
-		Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+		Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
         throw "Installation failed on register-with" 
       } 	
       else{
           Write-Host "Successfully registered the machine $registerComputerName"
 		  $slackBody["text"] = ":highfive: Successfully registered the machine $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName"
-		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
       }    	 	    
   }
