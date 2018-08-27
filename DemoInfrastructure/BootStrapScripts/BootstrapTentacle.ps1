@@ -40,7 +40,8 @@ if ($OctoTentacleService -eq $null)
     $tentacleListenPort = 10933 
     $tentacleHomeDirectory = "C:\Octopus" 
     $tentacleAppDirectory = "C:\Octopus\Applications" 
-    $tentacleConfigFile = "C:\Octopus\Tentacle\Tentacle.config"    
+    $tentacleConfigFile = "C:\Octopus\Tentacle\Tentacle.config"  
+    $tentacleDownloadPath = "https://octopus.com/downloads/latest/WindowsX64/OctopusTentacle" 	
 	
 	$tentaclePath = "C:\Tools\Octopus.Tentacle.msi" 
 
