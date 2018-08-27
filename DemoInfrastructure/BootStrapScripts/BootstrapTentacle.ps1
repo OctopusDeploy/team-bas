@@ -79,7 +79,7 @@ if ($OctoTentacleService -eq $null)
 
     Set-Location "${env:ProgramFiles}\Octopus Deploy\Tentacle" 
 	
-	$registerComputerName = "$computerName-Bootstrap-01"
+	$registerComputerName = "$instanceName-Bootstrap-01"
 	$bootstrapRoleName = "$applicationName-Bootstrap"
 	
 	$rolesToRegister = $roles -split "," | foreach { "--role `"Bootstrap-$($_.Trim())`"" }
