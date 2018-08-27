@@ -82,7 +82,7 @@ if ($OctoTentacleService -eq $null)
 	$registerComputerName = "$instanceName-Bootstrap-01"
 	$bootstrapRoleName = "$applicationName-Bootstrap"
 	
-	$rolesToRegister = $roles -split "," | foreach { "--role `"Bootstrap-$($_.Trim())`"" }
+	$rolesToRegister = $roleName -split "," | foreach { "--role `"Bootstrap-$($_.Trim())`"" }
 	$rolesToRegister = $rolesToRegister -join " "
 	$environmentsToRegister = $environmentToDeployTo -split "," | foreach { "--environment `"$($_.Trim())`"" }
 	$environmentsToRegister = $environmentsToRegister -join " "
@@ -96,55 +96,55 @@ if ($OctoTentacleService -eq $null)
 	& .\tentacle.exe create-instance --instance "Tentacle" --config $tentacleConfigFile --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	 $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on create-instance for $registerComputerName."
-	 Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	 Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	 throw "Installation failed on create-instance" 
 	} 
 	& .\tentacle.exe configure --instance "Tentacle" --home $tentacleHomeDirectory --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on configure home directory for $registerComputerName."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on configure" 
 	} 
 	& .\tentacle.exe configure --instance "Tentacle" --app $tentacleAppDirectory --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on configure app directory for $registerComputerName."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on configure" 
 	} 
 	& .\tentacle.exe configure --instance "Tentacle" --port $tentacleListenPort --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on configure listen port for $registerComputerName."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on configure" 
 	} 
 	& .\tentacle.exe new-certificate --instance "Tentacle" --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on creating new certificate for $registerComputerName."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on creating new certificate" 
 	} 
 	& .\tentacle.exe configure --instance "Tentacle" --trust $octopusServerThumbprint --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on configuring octopus server thumbprint for $registerComputerName."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on configure" 
 	} 	                  
-	$cmd = "& .\tentacle.exe register-with --instance `"Tentacle`" --server $octopusServerUrl $rolesToRegister --role $bootstrapRoleName --role $applicationName --environment `"SpinUp`" --environment `"TearDown`" $environmentsToRegister --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console"
+	$cmd = "& .\tentacle.exe register-with --instance `"Tentacle`" --server $octopusServerUrl $rolesToRegister --role $bootstrapRoleName --role $applicationName --environment `"SpinUp`" --environment `"TearDown`" $environmentsToRegister --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusServerApiKey --comms-style TentaclePassive --force --console"
 	Invoke-Expression $cmd | Write-Host
 	if ($lastExitCode -ne 0) { 
 	  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on registering $registerComputerName with $octopusServerUrl."
-	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on register-with" 
 	} 				                		               
 	& .\tentacle.exe service --instance "Tentacle" --install --start --console | Write-Output
 	if ($lastExitCode -ne 0) { 
 	   $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on install for $registerComputerName."
-	   Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	   Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  throw "Installation failed on service install" 
 	} 
 	
 	$slackBody["text"] = ":woohoo: Installation of bootstrap tentacle on $registerComputerName was successful."
-	Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+	Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	Write-Output "Tentacle commands complete"     
 } else {
     Write-Output "Tentacle already exists"
