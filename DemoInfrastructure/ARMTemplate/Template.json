@@ -1,0 +1,337 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the administrator of the new VM. Exclusion list: 'admin','administrator'"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the administrator account of the new VM"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }      
+    }, 
+	"sqlServerName": {
+        "type": "String",
+		"metadata": {
+			"description": "The name of the SQL Server you wish to create"
+		}
+    },
+    "webVmName": {
+      "type": "string",
+      "metadata": {
+          "description": "The name of the VM for the Web Server"
+      }
+    },
+    "webVmSize": {
+        "type": "string",
+        "metadata": {
+            "description": "The VM size for the Web Server VM"
+        }
+    },  
+    "vmDiskStorageAccountName": {
+        "type": "string",
+        "metadata": {
+            "description": "The storage account name to be used to store the VM hard drives"
+        }
+    },
+    "virtualNetworkName": {
+        "type": "string",
+        "metadata": {
+            "description": "VNET Name"
+        }
+    },
+    "virtualNetworkResourceGroup": {
+        "type": "string",
+        "metadata": {
+            "description": "Resource Group VNET is deployed in"
+        }
+    },
+    "subnet1Name": {
+        "type": "string",
+        "metadata": {
+            "description": "Name of the subnet inside the VNET"
+        }
+    }
+  },
+  "variables": {    
+    "webServerNetworkSecurityGroupName": "TentacleNsg",
+    "publicIpWebName": "[concat(parameters('webVmName'),'Ip')]",
+    "nicwebName": "[concat(parameters('webVmName'),'Nic')]",    
+    "vnetID": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/', parameters('subnet1Name'))]",
+	"sqlCreateIndexName": "[concat(parameters('servers_octopusbobtemplate_name'), '/CreateIndex')]",
+	"sqlDropIndexName": "[concat(parameters('servers_octopusbobtemplate_name'), '/DropIndex')]",
+	"sqlDbParameterizationName": "[concat(parameters('servers_octopusbobtemplate_name'), '/DbParameterization')]",
+	"sqlDefragmentIndexName": "[concat(parameters('servers_octopusbobtemplate_name'), '/DefragmentIndex')]",
+	"sqlForceLastGoodPlanName": "[concat(parameters('servers_octopusbobtemplate_name'), '/ForceLastGoodPlan')]",
+    "bootstrapWebVMName": "[concat(parameters('webVmName'),'bootStrap')]"
+  },
+  "resources": [
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate'.",
+		"type": "Microsoft.Sql/servers",
+		"kind": "v12.0",
+		"name": "[parameters('servers_octopusbobtemplate_name')]",
+		"apiVersion": "2015-05-01-preview",
+		"location": "southcentralus",
+		"scale": null,
+		"properties": {
+			"administratorLogin": "bob.walker",
+			"version": "12.0"
+		},
+		"dependsOn": []
+	},
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate/advisors/CreateIndex'.",
+		"type": "Microsoft.Sql/servers/advisors",
+		"name": "[variables('sqlCreateIndexName')]",
+		"apiVersion": "2014-04-01",
+		"scale": null,
+		"properties": {
+			"autoExecuteValue": "Disabled"
+		},
+		"dependsOn": [
+			"[resourceId('Microsoft.Sql/servers', parameters('servers_octopusbobtemplate_name'))]"
+		]
+	},
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate/advisors/DropIndex'.",
+		"type": "Microsoft.Sql/servers/advisors",
+		"name": "[variables('sqlDropIndexName')]",
+		"apiVersion": "2014-04-01",
+		"scale": null,
+		"properties": {
+			"autoExecuteValue": "Disabled"
+		},
+		"dependsOn": [
+			"[resourceId('Microsoft.Sql/servers', parameters('servers_octopusbobtemplate_name'))]"
+		]
+	},
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate/advisors/DbParameterization'.",
+		"type": "Microsoft.Sql/servers/advisors",
+		"name": "[variables('sqlDbParameterizationName')]",
+		"apiVersion": "2014-04-01",
+		"scale": null,
+		"properties": {
+			"autoExecuteValue": "Disabled"
+		},
+		"dependsOn": [
+			"[resourceId('Microsoft.Sql/servers', parameters('servers_octopusbobtemplate_name'))]"
+		]
+	},
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate/advisors/DefragmentIndex'.",
+		"type": "Microsoft.Sql/servers/advisors",
+		"name": "[variables('sqlDefragmentIndexName')]",
+		"apiVersion": "2014-04-01",
+		"scale": null,
+		"properties": {
+			"autoExecuteValue": "Disabled"
+		},
+		"dependsOn": [
+			"[resourceId('Microsoft.Sql/servers', parameters('servers_octopusbobtemplate_name'))]"
+		]
+	},
+	{
+		"comments": "Generalized from resource: '/subscriptions/301a6f94-2bf0-4972-b611-7bb703b2c2f6/resourceGroups/TemplateResourceGroup/providers/Microsoft.Sql/servers/octopusbobtemplate/advisors/ForceLastGoodPlan'.",
+		"type": "Microsoft.Sql/servers/advisors",
+		"name": "[variables('sqlForceLastGoodPlanName')]",
+		"apiVersion": "2014-04-01",
+		"scale": null,
+		"properties": {
+			"autoExecuteValue": "Disabled"
+		},
+		"dependsOn": [
+			"[resourceId('Microsoft.Sql/servers', parameters('servers_octopusbobtemplate_name'))]"
+		]
+	},
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIpWebName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },    
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('vmDiskStorageAccountName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },   
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[parameters('location')]"      
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('webServerNetworkSecurityGroupName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "description": "Allow RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-Octopus",
+            "properties": {
+              "description": "Allow Octopus",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "10933",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1001,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-web",
+            "properties": {
+              "description": "Allow web",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1002,
+              "direction": "Inbound"
+            }
+          }          
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicwebName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [        
+        "[resourceId('Microsoft.Network/networkSecurityGroups',variables('webServerNetworkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('webServerNetworkSecurityGroupName'))]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpWebName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnet1Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('webVmName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts',parameters('vmDiskStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',variables('nicwebName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('webVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('webVmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2016-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicwebName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('vmDiskStorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[variables('bootstrapWebVMName')]",
+      "apiVersion": "2015-01-01",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+              "uri": "https://gallery.azure.com/artifact/20161101/Microsoft.CustomScriptExtension-arm.2.0.50/Artifacts/MainTemplate.json"
+          },
+          "parameters": {
+              "vmName": {
+                  "value": "[parameters('webVmName')]"
+              },
+              "location": {
+                  "value": "[parameters('location')]"
+              },
+              "fileUris": {
+                  "value": "https://raw.githubusercontent.com/OctopusDeploy/team-bas/master/DemoInfrastructure/BootStrapScripts/BootstrapTentacle.ps1"
+              },
+              "arguments": {
+                  "value": "\"#{Global.Octopus.Url}\" \"#{Global.Octopus.ApiKey}\" \"#{Global.Octopus.ServerThumbprint}\" \"#{Project.Environments.List}\" \"#{Project.Features.List}\" \"#{Project.Web.VM.Name}\" \"#{Project.Application.Name}\" \"#{Global.Slack.NotificationUrl}\""
+              }
+          }
+      },
+      "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', parameters('webVmName'))]"
+      ]
+    }
+  ]
+}

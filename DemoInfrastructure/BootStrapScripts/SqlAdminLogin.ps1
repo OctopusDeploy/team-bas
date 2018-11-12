@@ -3,6 +3,15 @@ Start-Transcript -path "C:\SQLServerBootstrap.txt" -append
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
 $octopusAdminDatabaseServer = "#{Global.Database.Server}"
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+Write-Host "Installing SQL Management Studio"
+choco install sql-server-management-studio -y
+
+Write-Host "Installing SQL Server Express Warning, this will restart the box"
+choco install sql-server-express -y
+
 $connectionString = "Server=$octopusAdminDatabaseServer;Database=master;integrated security=true;"
 
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
