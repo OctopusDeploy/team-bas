@@ -180,6 +180,16 @@ Resources:
                   throw "Installation failed on service install" 
                 } 
                 
+                Write-Host "Installing SQL Management Studio"
+                $slackBody["text"] = "Installing SSMS on $registerComputerName"
+                Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+                choco install sql-server-management-studio -y
+                
+                Write-Host "Installing SQL Server Express Warning, this may restart the box"
+                $slackBody["text"] = "Installing SQL Server Express on $registerComputerName"
+                Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+                choco install sql-server-express -y
+                
                 $slackBody["text"] = ":woohoo: Installation of bootstrap tentacle on $registerComputerName was successful."
                 Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
                 Write-Output "Tentacle commands complete"             

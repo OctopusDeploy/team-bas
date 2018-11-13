@@ -24,6 +24,7 @@ Set-Location "${env:ProgramFiles}\Octopus Deploy\Tentacle"
 $tenantList = $tenants -split ","
 $machineList = $machinesToRegister -split ","
 $previousMachineName = ""
+$registerComputerList = "$computerName"
 
  $slackBody = @{
 	"channel" = "#demo-env-pulse"
@@ -61,8 +62,7 @@ foreach ($tenant in $tenantList){
       } 	
       else{
           Write-Host "Successfully registered the machine $registerComputerName"
-		  $slackBody["text"] = ":highfive: Successfully registered the machine $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName for the tenant $tenant"
-		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
+		  $registerComputerList = "$registerComputerList,$registerComputerName"
       }    	 	 
   }
 }
@@ -95,8 +95,10 @@ foreach ($tenant in $tenantList){
         throw "Installation failed on register-with" 
       } 	
       else{
-          Write-Host "Successfully registered the machine $registerComputerName"
-		  $slackBody["text"] = ":highfive: Successfully registered the machine $registerComputerName with $octopusServerUrl for the environment $environment with the role $applicationRoleName"
-		  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
+          Write-Host "Successfully registered the machine $registerComputerName"		  
+		  $registerComputerList = "$registerComputerList,$registerComputerName"
       }    	 	    
   }
+  
+$slackBody["text"] = ":highfive: Successfully registered the machine $registerComputerList with $octopusServerUrl for the environment $environment with the role $applicationRoleName"
+Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
