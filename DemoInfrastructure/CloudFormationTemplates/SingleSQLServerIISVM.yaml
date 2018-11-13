@@ -180,6 +180,8 @@ Resources:
                   throw "Installation failed on service install" 
                 } 
                 
+                Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+                
                 Write-Host "Installing SQL Management Studio"
                 $slackBody["text"] = "Installing SSMS on $registerComputerName"
                 Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
