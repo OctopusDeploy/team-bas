@@ -3,7 +3,7 @@ Start-Transcript -path "C:\SQLServerBootstrap.txt" -append
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
 $octopusAdminDatabaseServer = "#{Global.Database.Server}"
-
+1
 $connectionString = "Server=$octopusAdminDatabaseServer;Database=master;integrated security=true;"
 
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -16,12 +16,12 @@ Write-Output "Opening the connection to $octopusAdminDatabaseServer"
 $sqlConnection.Open()
 
 Write-Output "Running the if not exists then create user command on the server"
-$command.CommandText = "CREATE LOGIN [$octopusAdminDatabaseUser] with Password='$octopusAdminDatabasePassword', default_database=master"            
-$command.ExecuteNonQuery()
+# $command.CommandText = "CREATE LOGIN [$octopusAdminDatabaseUser] with Password='$octopusAdminDatabasePassword', default_database=master"            
+# $command.ExecuteNonQuery()
 
 Write-Output "Granting the sysadmin role to $octopusAdminDatabaseUser"
-$command.CommandText = "sp_addsrvrolemember @loginame= '$octopusAdminDatabaseUser', @rolename = 'sysadmin'"  
-$command.ExecuteNonQuery()
+# $command.CommandText = "sp_addsrvrolemember @loginame= '$octopusAdminDatabaseUser', @rolename = 'sysadmin'"  
+# $command.ExecuteNonQuery()
 
 Write-Output "Successfully created the account $octopusAdminDatabaseUser"
 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
@@ -32,7 +32,7 @@ $sqlRegistryLoginName = "LoginMode"
 
 $sqlRegistryLoginValue = "2"
 
-New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
+# New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
-net stop MSSQLSERVER /y
-net start MSSQLSERVER
+# net stop MSSQLSERVER /y
+# net start MSSQLSERVER
