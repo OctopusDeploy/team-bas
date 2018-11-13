@@ -221,7 +221,7 @@ Resources:
                 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
                 $sqlConnection.Close()
 
-                $sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQLServer"
+                $sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
                 $sqlRegistryLoginName = "LoginMode"
 
                 $sqlRegistryLoginValue = "2"
