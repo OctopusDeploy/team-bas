@@ -166,20 +166,14 @@ Resources:
                   Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
                   throw "Installation failed on configure" 
                 } 	                  
-                $cmd = "& .\tentacle.exe register-with --instance `"Tentacle`" --server $octopusServerUrl $rolesToRegister --role $bootstrapRoleName --role $applicationName --environment `"SpinUp`" --environment `"TearDown`" $environmentsToRegister --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console"
-                Invoke-Expression $cmd | Write-Host
-                if ($lastExitCode -ne 0) { 
-                  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on registering $registerComputerName with $octopusServerUrl."
-                  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
-                  throw "Installation failed on register-with" 
-                } 				                		               
+                
                 & .\tentacle.exe service --instance "Tentacle" --install --start --console | Write-Output
                 if ($lastExitCode -ne 0) { 
                    $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on install for $registerComputerName."
                    Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
                   throw "Installation failed on service install" 
                 } 
-                
+
                 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
                 
                 Write-Host "Installing SQL Management Studio"
@@ -190,7 +184,15 @@ Resources:
                 Write-Host "Installing SQL Server Express Warning, this may restart the box"
                 $slackBody["text"] = "Installing SQL Server Express on $registerComputerName"
                 Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
-                choco install sql-server-express -y
+                choco install sql-server-express -y                
+                
+                $cmd = "& .\tentacle.exe register-with --instance `"Tentacle`" --server $octopusServerUrl $rolesToRegister --role $bootstrapRoleName --role $applicationName --environment `"SpinUp`" --environment `"TearDown`" $environmentsToRegister --name $registerComputerName --publicHostName $ipAddress --apiKey $octopusApiKey --comms-style TentaclePassive --force --console"
+                Invoke-Expression $cmd | Write-Host
+                if ($lastExitCode -ne 0) { 
+                  $slackBody["text"] = ":sadpanda: \<!channel\> Installation failed on registering $registerComputerName with $octopusServerUrl."
+                  Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
+                  throw "Installation failed on register-with" 
+                } 				                		               
                 
                 $slackBody["text"] = ":woohoo: Installation of bootstrap tentacle on $registerComputerName was successful."
                 Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
