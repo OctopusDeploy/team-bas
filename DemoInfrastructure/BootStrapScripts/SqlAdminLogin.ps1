@@ -34,5 +34,5 @@ $sqlRegistryLoginValue = "2"
 
 New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
-net stop MSSQL$SQLEXPRESS /y
-net start MSSQL$SQLEXPRESS
+net stop MSSQL`$SQLEXPRESS /y
+net start MSSQL`$SQLEXPRESS

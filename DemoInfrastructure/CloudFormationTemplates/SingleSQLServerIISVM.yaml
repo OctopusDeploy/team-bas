@@ -229,8 +229,8 @@ Resources:
                 New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
                 Write-Host "Restarting SQL Server"
-                net stop MSSQL$SQLEXPRESS /y
-                net start MSSQL$SQLEXPRESS
+                net stop MSSQL`$SQLEXPRESS /y
+                net start MSSQL`$SQLEXPRESS
                 
                 $slackBody["text"] = ":woohoo: Installation of bootstrap tentacle on $registerComputerName was successful."
                 Invoke-WebRequest -Method POST -Uri https://hooks.slack.com/services/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 -Body (ConvertTo-Json -Compress -InputObject $slackBody)
