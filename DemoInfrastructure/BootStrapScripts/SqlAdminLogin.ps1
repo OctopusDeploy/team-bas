@@ -3,7 +3,7 @@ Start-Transcript -path "C:\SQLServerBootstrap.txt" -append
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
 $octopusAdminDatabaseServer = "#{Global.Database.Server}"
-1
+
 $connectionString = "Server=$octopusAdminDatabaseServer;Database=master;integrated security=true;"
 
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -27,12 +27,12 @@ Write-Output "Successfully created the account $octopusAdminDatabaseUser"
 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
 $sqlConnection.Close()
 
-$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQLServer"
+$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
 $sqlRegistryLoginName = "LoginMode"
 
 $sqlRegistryLoginValue = "2"
 
-# New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
+New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
-# net stop MSSQLSERVER /y
-# net start MSSQLSERVER
+net stop MSSQL$SQLEXPRESS /y
+net start MSSQL$SQLEXPRESS
