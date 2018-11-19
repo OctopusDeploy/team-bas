@@ -52,51 +52,64 @@ If ((test-path $tentacleConfigFile) -eq $false)
 		"text" = ":woohoo: Installation of bootstrap tentacle on $instanceName was successful"
 	}
 
+	Write-Output "Creating the octopus instance"
 	& .\tentacle.exe create-instance --instance "Tentacle" --config $tentacleConfigFile --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	 $slackBody["text"] = ":sadpanda: Installation failed on create-instance for $instanceName."
+	 $slackBody["text"] = ":sadpanda: Installation failed on create-instance for $instanceName with the exit code $lastExitCode"
 	 Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	 $errorMessage = $error[0].Exception.Message	 
 	 throw "Installation failed on create-instance: $errorMessage" 
 	} 
+	
+	Write-Output "Configuring the home directory"
 	& .\tentacle.exe configure --instance "Tentacle" --home $tentacleHomeDirectory --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	  $slackBody["text"] = ":sadpanda: Installation failed on configure home directory for $instanceName."
+	  $slackBody["text"] = ":sadpanda: Installation failed on configure home directory for $instanceName with the exit code $lastExitCode"
 	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on configure: $errorMessage" 
 	} 
+	
+	Write-Output "Configuring the app directory"
 	& .\tentacle.exe configure --instance "Tentacle" --app $tentacleAppDirectory --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	  $slackBody["text"] = ":sadpanda: Installation failed on configure app directory for $instanceName."
+	  $slackBody["text"] = ":sadpanda: Installation failed on configure app directory for $instanceName with the exit code $lastExitCode"
 	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on configure: $errorMessage" 
 	} 
+	
+	Write-Output "Configuring the listening port"
 	& .\tentacle.exe configure --instance "Tentacle" --port $tentacleListenPort --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	  $slackBody["text"] = ":sadpanda: Installation failed on configure listen port for $instanceName."
+	  $slackBody["text"] = ":sadpanda: Installation failed on configure listen port for $instanceName with the exit code $lastExitCode"
 	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on configure: $errorMessage" 
 	} 
+	
+	Write-Output "Creating a certificate for the tentacle"
 	& .\tentacle.exe new-certificate --instance "Tentacle" --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	  $slackBody["text"] = ":sadpanda:  Installation failed on creating new certificate for $instanceName."
+	  $slackBody["text"] = ":sadpanda:  Installation failed on creating new certificate for $instanceName with the exit code $lastExitCode"
 	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on creating new certificate: $errorMessage" 
 	} 
+	
+	Write-Output "Trusting the certificate $octopusServerThumbprint"
 	& .\tentacle.exe configure --instance "Tentacle" --trust $octopusServerThumbprint --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	  $slackBody["text"] = ":sadpanda:  Installation failed on configuring octopus server thumbprint for $instanceName."
+	  $slackBody["text"] = ":sadpanda:  Installation failed on configuring octopus server thumbprint for $instanceName with the exit code $lastExitCode"
 	  Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	  $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on configure: $errorMessage" 
-	} 	                  	
+	} 	                
+
+	Write-Output "Finally, installing the tentacle"
 	& .\tentacle.exe service --instance "Tentacle" --install --start --console | Write-Output
 	if ($lastExitCode -ne 0) { 
-	   $slackBody["text"] = ":sadpanda:  Installation failed on install for $instanceName."
+	   $slackBody["text"] = ":sadpanda:  Installation failed on install for $instanceName with the exit code $lastExitCode"
 	   Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
 	   $errorMessage = $error[0].Exception.Message	 
 	  throw "Installation failed on service install: $errorMessage" 
