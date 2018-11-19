@@ -13,7 +13,7 @@ Write-Output "SlackNotificationUrl: $slackNotificationUrl"
 Write-Output "ChocolateyAppList: $chocolateyAppList"
 
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-& choco install octopusdeploy.tentacle /y
+& choco install octopusdeploy.tentacle /y | Write-Output
 
 if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
 	Write-Host "Chocolatey Apps Specified, installing chocolatey and applications"	
@@ -23,7 +23,7 @@ if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
 	foreach ($app in $appsToInstall)
 	{
 		Write-Host "Installing $app"
-		& choco install $app /y 
+		& choco install $app /y | Write-Output
 	}
 }
 
