@@ -27,15 +27,13 @@ if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
 	}
 }
 
-$OctoTentacleService = Get-Service "OctopusDeploy Tentacle" -ErrorAction SilentlyContinue
+$tentacleListenPort = 10933 
+$tentacleHomeDirectory = "C:\Octopus" 
+$tentacleAppDirectory = "C:\Octopus\Applications" 
+$tentacleConfigFile = "C:\Octopus\Tentacle\Tentacle.config"     
 
-if ($OctoTentacleService -eq $null)
-{
-    $tentacleListenPort = 10933 
-    $tentacleHomeDirectory = "C:\Octopus" 
-    $tentacleAppDirectory = "C:\Octopus\Applications" 
-    $tentacleConfigFile = "C:\Octopus\Tentacle\Tentacle.config"      	
-
+If ((test-path $tentacleConfigFile) -eq $false)
+{ 	
     Write-Output "Beginning Tentacle installation"     	
     
     Write-Output "Open port $tentacleListenPort on Windows Firewall" 
