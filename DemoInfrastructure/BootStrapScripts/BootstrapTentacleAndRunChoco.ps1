@@ -12,21 +12,6 @@ Write-Output "InstanceName: $instanceName"
 Write-Output "SlackNotificationUrl: $slackNotificationUrl"
 Write-Output "ChocolateyAppList: $chocolateyAppList"
 
-# Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-# & choco install octopusdeploy.tentacle /y | Write-Output
-
-# if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
-#	Write-Host "Chocolatey Apps Specified, installing chocolatey and applications"	
-	
-#	$appsToInstall = $chocolateyAppList -split "," | foreach { "$($_.Trim())" }
-
-#	foreach ($app in $appsToInstall)
-#	{
-#		Write-Host "Installing $app"
-#		& choco install $app /y | Write-Output
-#	}
-#}
-
 function Get-FileFromServer 
 { 
 	param ( 
@@ -153,5 +138,26 @@ if ($OctoTentacleService -eq $null)
     Write-Output "Tentacle already exists"
 }    
 
+if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
+	Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+	Write-Host "Chocolatey Apps Specified, installing chocolatey and applications"	
+	
+	$appsToInstall = $chocolateyAppList -split "," | foreach { "$($_.Trim())" }
+
+	foreach ($app in $appsToInstall)
+	{
+		Write-Host "Installing $app"
+		& choco install $app /y | Write-Output
+	}
+}
+
+Set-Location "${env:ProgramFiles}\Octopus Deploy\Tentacle"
+& .\tentacle.exe service --instance "Tentacle" --stop --start --console | Write-Output
+if ($lastExitCode -ne 0) { 
+   $slackBody["text"] = ":sadpanda:  Installation failed on install for $instanceName with the exit code $lastExitCode"
+   Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
+   $errorMessage = $error[0].Exception.Message	 
+   throw "Installation failed on service install: $errorMessage" 
+} 
 
 Write-Output "Bootstrap commands complete"  
