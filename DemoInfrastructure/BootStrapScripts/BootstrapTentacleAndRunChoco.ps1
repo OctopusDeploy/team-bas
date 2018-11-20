@@ -139,7 +139,13 @@ if ($OctoTentacleService -eq $null)
 }    
 
 if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){	
-	iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+	try{
+		choco config get cacheLocation
+	}catch{
+		Write-Output "Chocolatey not detected, trying to install now"
+		iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+	}
+	
 	Write-Host "Chocolatey Apps Specified, installing chocolatey and applications"	
 	
 	$appsToInstall = $chocolateyAppList -split "," | foreach { "$($_.Trim())" }
@@ -150,15 +156,5 @@ if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
 		& choco install $app /y | Write-Output
 	}
 }
-
-Set-Location "${env:ProgramFiles}\Octopus Deploy\Tentacle"
-Write-Output "Restarting the tentacle after the chocolatey installs"
-& .\tentacle.exe service --instance "Tentacle" --stop --start --console | Write-Output
-if ($lastExitCode -ne 0) { 
-   $slackBody["text"] = ":sadpanda:  Restart after chocolatey apps install $instanceName with the exit code $lastExitCode"
-   Invoke-WebRequest -Method POST -Uri $slackNotificationUrl -Body (ConvertTo-Json -Compress -InputObject $slackBody) -UseBasicParsing
-   $errorMessage = $error[0].Exception.Message	 
-   throw "Restart failed on service: $errorMessage" 
-} 
 
 Write-Output "Bootstrap commands complete"  
