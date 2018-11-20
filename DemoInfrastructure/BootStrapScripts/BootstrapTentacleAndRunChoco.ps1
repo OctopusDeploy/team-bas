@@ -138,8 +138,7 @@ if ($OctoTentacleService -eq $null)
     Write-Output "Tentacle already exists"
 }    
 
-if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){
-	Set-ExecutionPolicy AllSigned
+if ([string]::IsNullOrWhiteSpace($chocolateyAppList) -eq $false){	
 	iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 	Write-Host "Chocolatey Apps Specified, installing chocolatey and applications"	
 	
