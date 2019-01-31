@@ -1,5 +1,7 @@
 Start-Transcript -path "C:\SQLServerBootstrap.txt" -append 
 
+choco install sql-server-express -y
+
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
 $octopusAdminDatabaseServer = "#{Global.Database.Server}"
@@ -16,12 +18,12 @@ Write-Output "Opening the connection to $octopusAdminDatabaseServer"
 $sqlConnection.Open()
 
 Write-Output "Running the if not exists then create user command on the server"
-# $command.CommandText = "CREATE LOGIN [$octopusAdminDatabaseUser] with Password='$octopusAdminDatabasePassword', default_database=master"            
-# $command.ExecuteNonQuery()
+$command.CommandText = "CREATE LOGIN [$octopusAdminDatabaseUser] with Password='$octopusAdminDatabasePassword', default_database=master"            
+$command.ExecuteNonQuery()
 
 Write-Output "Granting the sysadmin role to $octopusAdminDatabaseUser"
-# $command.CommandText = "sp_addsrvrolemember @loginame= '$octopusAdminDatabaseUser', @rolename = 'sysadmin'"  
-# $command.ExecuteNonQuery()
+$command.CommandText = "sp_addsrvrolemember @loginame= '$octopusAdminDatabaseUser', @rolename = 'sysadmin'"  
+$command.ExecuteNonQuery()
 
 Write-Output "Successfully created the account $octopusAdminDatabaseUser"
 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
