@@ -1,5 +1,18 @@
 Start-Transcript -path "C:\SQLServerBootstrap.txt" -append 
 
+function Get-FileFromServer 
+{ 
+	param ( 
+	  [string]$url, 
+	  [string]$saveAs 
+	) 
+
+	Write-Host "Downloading $url to $saveAs" 
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
+	$downloader = new-object System.Net.WebClient 
+	$downloader.DownloadFile($url, $saveAs) 
+} 
+
 $ErrorActionPreference = 'Stop';
  
 $packageName= 'sql-server-express'
@@ -12,8 +25,8 @@ $tempDir = "C:\SQLServerExpress"
  
 if (![System.IO.Directory]::Exists($tempDir)) { [System.IO.Directory]::CreateDirectory($tempDir) | Out-Null }
 $fileFullPath = "$tempDir\SQLEXPR.exe"
- 
-Get-ChocolateyWebFile -PackageName $packageName -FileFullPath $fileFullPath -Url $url -Url64bit $url64 -Checksum $checksum -ChecksumType 'sha1'
+
+Get-FileFromServer $url64 $fileFullPath
  
 Write-Host "Extracting..."
 $extractPath = "$tempDir\SQLServerExpresInstall"
@@ -21,10 +34,8 @@ Start-Process "$fileFullPath" "/Q /x:`"$extractPath`"" -Wait
  
 Write-Host "Installing..."
 $setupPath = "$extractPath\setup.exe"
-Install-ChocolateyInstallPackage "$packageName" "EXE" "$silentArgs" "$setupPath" -validExitCodes @(0, 3010, 1116)
- 
-Write-Host "Removing extracted files..."
-Remove-Item -Recurse "$extractPath"
+
+Start-Process $setupPath "/IACCEPTSQLSERVERLICENSETERMS /Q /ACTION=install /INSTANCEID=SQLEXPRESS /INSTANCENAME=SQLEXPRESS /UPDATEENABLED=FALSE"
 
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
