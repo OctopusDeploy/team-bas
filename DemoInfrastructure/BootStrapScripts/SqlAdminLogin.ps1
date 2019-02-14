@@ -1,6 +1,30 @@
 Start-Transcript -path "C:\SQLServerBootstrap.txt" -append 
 
-choco install sql-server-2016-developer-edition -y
+$ErrorActionPreference = 'Stop';
+ 
+$packageName= 'sql-server-express'
+$url        = ''
+$url64      = 'https://download.microsoft.com/download/E/F/2/EF23C21D-7860-4F05-88CE-39AA114B014B/SQLEXPR_x64_ENU.exe'
+$checksum   = '71321559eff923066799d7fc26b6c7aedd41eee1'
+$silentArgs = "/IACCEPTSQLSERVERLICENSETERMS /Q /ACTION=install /INSTANCEID=SQLEXPRESS /INSTANCENAME=SQLEXPRESS /UPDATEENABLED=FALSE"
+ 
+$tempDir = "C:\SQLServerExpress"
+ 
+if (![System.IO.Directory]::Exists($tempDir)) { [System.IO.Directory]::CreateDirectory($tempDir) | Out-Null }
+$fileFullPath = "$tempDir\SQLEXPR.exe"
+ 
+Get-ChocolateyWebFile -PackageName $packageName -FileFullPath $fileFullPath -Url $url -Url64bit $url64 -Checksum $checksum -ChecksumType 'sha1'
+ 
+Write-Host "Extracting..."
+$extractPath = "$tempDir\SQLServerExpresInstall"
+Start-Process "$fileFullPath" "/Q /x:`"$extractPath`"" -Wait
+ 
+Write-Host "Installing..."
+$setupPath = "$extractPath\setup.exe"
+Install-ChocolateyInstallPackage "$packageName" "EXE" "$silentArgs" "$setupPath" -validExitCodes @(0, 3010, 1116)
+ 
+Write-Host "Removing extracted files..."
+Remove-Item -Recurse "$extractPath"
 
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
@@ -29,16 +53,12 @@ Write-Output "Successfully created the account $octopusAdminDatabaseUser"
 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
 $sqlConnection.Close()
 
-# $sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
-$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQLServer"
+$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
 $sqlRegistryLoginName = "LoginMode"
 
 $sqlRegistryLoginValue = "2"
 
 New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
-# net stop MSSQL`$SQLEXPRESS /y
-# net start MSSQL`$SQLEXPRESS
-
-net stop MSSQLSERVER /y
-net start MSSQLSERVER
+net stop MSSQL`$SQLEXPRESS /y
+net start MSSQL`$SQLEXPRESS
