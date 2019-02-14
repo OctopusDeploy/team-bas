@@ -1,6 +1,6 @@
 Start-Transcript -path "C:\SQLServerBootstrap.txt" -append 
 
-choco install sql-server-express -y
+choco install sql-server-2017 -y
 
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
@@ -29,12 +29,16 @@ Write-Output "Successfully created the account $octopusAdminDatabaseUser"
 Write-Output "Closing the connection to $octopusAdminDatabaseServer"
 $sqlConnection.Close()
 
-$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
+# $sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQLServer"
+$sqlRegistryPath = "HKLM:\Software\Microsoft\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQLServer"
 $sqlRegistryLoginName = "LoginMode"
 
 $sqlRegistryLoginValue = "2"
 
 New-ItemProperty -Path $sqlRegistryPath -Name $sqlRegistryLoginName -Value $sqlRegistryLoginValue -PropertyType DWORD -Force
 
-net stop MSSQL`$SQLEXPRESS /y
-net start MSSQL`$SQLEXPRESS
+# net stop MSSQL`$SQLEXPRESS /y
+# net start MSSQL`$SQLEXPRESS
+
+net stop MSSQLSERVER /y
+net start MSSQLSERVER
