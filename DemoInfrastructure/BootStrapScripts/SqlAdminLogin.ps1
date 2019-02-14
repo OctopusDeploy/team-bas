@@ -35,7 +35,7 @@ Start-Process "$fileFullPath" "/Q /x:`"$extractPath`"" -Wait
 Write-Host "Installing..."
 $setupPath = "$extractPath\setup.exe"
 
-Start-Process $setupPath "/IACCEPTSQLSERVERLICENSETERMS /Q /ACTION=install /INSTANCEID=SQLEXPRESS /INSTANCENAME=SQLEXPRESS /UPDATEENABLED=FALSE"
+Start-Process $setupPath "/IACCEPTSQLSERVERLICENSETERMS /Q /ACTION=install /INSTANCEID=SQLEXPRESS /INSTANCENAME=SQLEXPRESS /UPDATEENABLED=FALSE" -Wait
 
 $octopusAdminDatabaseUser = "#{Global.Database.AdminUser}"
 $octopusAdminDatabasePassword = "#{Global.Database.AdminPassword}"
