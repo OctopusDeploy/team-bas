@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: dt-pm-claim
+  name: dt-pm-tc
   labels:
     app: data
 spec:
